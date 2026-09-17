@@ -1,7 +1,7 @@
 
 // Photos must be named img-20.jpeg through img-30.jpeg in /public.
 const photos = Array.from({ length: 11 }, (_, i) => ({
-  src: `public/img-${i + 20}.jpeg`,
+  src: `img-${i + 20}.jpeg`,
   title: `A moment to remember`,
   number: String(i + 1).padStart(2, "0")
 }));
