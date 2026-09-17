@@ -1,42 +1,93 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Simple Website</title>
-    <style>
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            text-align: center;
-            padding: 20px;
-        }
-        .container {
-            background: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-        }
-        h1 {
-            color: #0070f3;
-            margin-top: 0;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1019" />
+  <meta name="description" content="A small thank you to Naturub for being part of our internship journey." />
+  <title>Thank You, Naturub — Our Journey</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet" />
+  <link rel="preload" as="image" href="/img-20.jpeg" />
+  <link rel="stylesheet" href="./style.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/ScrollTrigger.min.js"></script>
+  <script defer src="./script.js"></script>
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
 
-    <div class="container">
-        <h1>Hello, World!</h1>
-        <p>This is a simple HTML page deployed on Vercel.</p>
-    </div>
+  <header class="site-header">
+    <a class="wordmark" href="#top" aria-label="Naturub thank-you page, back to top">NATURUB <span class="wordmark-suffix">/ memories</span></a>
+    <a class="header-link" href="#memories">Explore our moments <span aria-hidden="true">↗</span></a>
+  </header>
 
+  <main id="main">
+    <section class="hero" id="top" aria-labelledby="hero-title">
+      <img class="hero-photo" src="/img-20.jpeg" alt="A memory from our internship at Naturub" fetchpriority="high" />
+      <div class="hero-shade" aria-hidden="true"></div>
+      <div class="hero-content">
+        <p class="eyebrow hero-intro"><span class="tiny-spark" aria-hidden="true">✦</span> A little note from your interns</p>
+        <h1 id="hero-title">Some journeys<br />leave a <em>mark.</em></h1>
+        <p class="hero-copy">Ours is one of them. Thank you, Naturub, for the guidance, the opportunities, and the people who made it memorable.</p>
+        <a class="primary-link" href="#memories">Explore our memories <span aria-hidden="true">↗</span></a>
+      </div>
+      <div class="hero-bottom"><span>WITH GRATITUDE, ALWAYS</span><span>SCROLL TO EXPLORE ↓</span></div>
+    </section>
+
+    <section class="intro section-shell" aria-labelledby="intro-title">
+      <div class="intro-top reveal"><span class="section-index">01 / THE JOURNEY</span><span class="little-line" aria-hidden="true"></span><span class="section-index">A CHAPTER TO REMEMBER</span></div>
+      <div class="intro-layout">
+        <div class="reveal"><p class="eyebrow">To everyone at Naturub</p><h2 id="intro-title">More than an<br /><em>internship.</em></h2></div>
+        <div class="intro-right reveal"><p>We arrived ready to learn. We leave with new skills, meaningful experiences, and memories that will stay with us long after our final day.</p><p>To every mentor, colleague, and team who welcomed us, answered our questions, and made space for us to grow — <strong>thank you.</strong></p><div class="signature">With appreciation <span aria-hidden="true">♥</span><small>YOUR INTERNS</small></div></div>
+      </div>
+    </section>
+
+    <section class="memory-section section-shell" id="memories" aria-labelledby="memories-title">
+      <div class="memory-heading reveal"><div><p class="eyebrow">The little things that stay</p><h2 id="memories-title">Our <em>moments.</em></h2></div><p>Every picture holds a little piece of the journey.</p></div>
+      <div class="tab-bar" role="tablist" aria-label="Memory sections">
+        <button class="tab active" id="tab-gallery" type="button" role="tab" aria-selected="true" aria-controls="panel-gallery" data-tab="gallery">01 <span>Photo memories</span></button>
+        <button class="tab" id="tab-note" type="button" role="tab" aria-selected="false" aria-controls="panel-note" data-tab="note" tabindex="-1">02 <span>A note in code</span></button>
+        <span class="tab-indicator" aria-hidden="true"></span>
+      </div>
+
+      <div class="tab-panel" id="panel-gallery" role="tabpanel" aria-labelledby="tab-gallery" tabindex="0">
+        <div class="gallery-instructions"><span>11 little snapshots of a big chapter</span><span>Tap to view · Double-tap to ♥</span></div>
+        <div class="gallery" id="gallery" aria-label="Internship photo gallery"></div>
+      </div>
+
+      <div class="tab-panel terminal-panel" id="panel-note" role="tabpanel" aria-labelledby="tab-note" tabindex="0" hidden>
+        <div class="terminal-intro">
+          <p class="eyebrow">To every mentor and colleague</p>
+          <h3>Our gratitude, <em>in code.</em></h3>
+          <p>A little message for the people who helped us learn, grow and feel welcome.</p>
+        </div>
+        <div class="terminal-window" aria-label="An animated terminal displaying our thank-you message">
+          <div class="terminal-toolbar">
+            <span class="terminal-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span>naturub / gratitude.cmd</span>
+            <span class="terminal-status"><span class="terminal-status-dot" aria-hidden="true"></span> LIVE</span>
+          </div>
+          <div class="terminal-content">
+            <p class="terminal-prompt"><span class="prompt-arrow" aria-hidden="true">❯</span> naturub --show-gratitude</p>
+            <pre class="terminal-text"><code id="typed-message" aria-label="A little message from all of us, thanking our mentors for their guidance, patience, knowledge and kindness."></code><span class="terminal-cursor" aria-hidden="true">▌</span></pre>
+          </div>
+          <div class="terminal-footer"><span>WITH GRATITUDE · FROM YOUR INTERNS</span><button type="button" id="replay-typing" aria-label="Replay the thank-you message typing animation">↻ Replay</button></div>
+        </div>
+        <p class="terminal-footnote">Not every lesson is written in code. Some stay with us for life. ♥</p>
+      </div>
+    </section>
+
+    <section class="closing section-shell reveal" aria-labelledby="closing-title"><span class="closing-spark" aria-hidden="true">✳</span><p class="eyebrow">To the people who made it special</p><h2 id="closing-title">Thank you for<br /><em>everything.</em></h2><p>Here's to the lessons, the laughter, and all the memories in between.</p><a href="#top" class="back-top">Back to the beginning ↑</a></section>
+  </main>
+  <footer class="footer"><span>NATURUB / OUR JOURNEY</span><span>Made with gratitude ♥</span></footer>
+
+  <dialog class="lightbox" id="lightbox" aria-label="Photo viewer">
+    <div class="lightbox-shell"><div class="lightbox-top"><span id="lightbox-count">01 / 11</span><button id="close-lightbox" class="icon-button" type="button" aria-label="Close photo viewer">✕</button></div><div class="lightbox-stage"><button id="prev-photo" class="viewer-arrow previous" type="button" aria-label="Previous photo">←</button><div class="viewer-image-wrap" id="viewer-image-wrap"><img id="lightbox-image" alt="" draggable="false" /><span id="viewer-heart" class="viewer-heart" aria-hidden="true">♥</span></div><button id="next-photo" class="viewer-arrow next" type="button" aria-label="Next photo">→</button></div><div class="lightbox-bottom"><span id="lightbox-caption">A moment to remember</span><span>Swipe to explore</span></div></div>
+  </dialog>
+  <div class="sr-only" id="live-status" aria-live="polite"></div>
 </body>
 </html>
