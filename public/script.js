@@ -1,232 +1,1179 @@
 
-// Photos must be named img-20.jpeg through img-30.jpeg in /public.
+// ========================================================
+// NATURUB THANK-YOU WEBSITE — V4
+// Complete JavaScript
+// ========================================================
+
+// Photos: img-20.jpeg through img-30.jpeg
 const photos = Array.from({ length: 11 }, (_, i) => ({
-  src: `/img-${i + 20}.jpeg`,
-  title: `A moment to remember`,
+  src: `img-${i + 20}.jpeg`,
+  title: "A moment to remember",
   number: String(i + 1).padStart(2, "0")
 }));
 
-const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-const gallery = document.getElementById("gallery");
-const dialog = document.getElementById("lightbox");
-const viewerImage = document.getElementById("lightbox-image");
-const viewerCount = document.getElementById("lightbox-count");
-const viewerCaption = document.getElementById("lightbox-caption");
-const status = document.getElementById("live-status");
-let currentPhoto = 0;
+const reducedMotion = window.matchMedia(
+  "(prefers-reduced-motion: reduce)"
+).matches;
 
-function replayHeart(element) {
-  element.classList.remove("burst");
-  void element.offsetWidth; // Restart the CSS animation on every double-tap.
-  element.classList.add("burst");
-  status.textContent = "A little love for this memory!";
+
+// ========================================================
+// 1. CINEMATIC HERO BACKGROUND SLIDESHOW
+// First five images: img-20 to img-24
+// Crossfade + gentle zoom + infinite loop
+// ========================================================
+
+function initHeroSlideshow() {
+
+  const hero = document.querySelector(".hero");
+  const firstImage = hero?.querySelector(".hero-photo");
+
+  if (!hero || !firstImage) return;
+
+  // Respect accessibility settings
+  if (reducedMotion) return;
+
+  const sources = Array.from(
+    { length: 5 },
+    (_, i) => `/img-${i + 20}.jpeg`
+  );
+
+  const DISPLAY_TIME = 5200;
+  const FADE_TIME = 1500;
+
+  let activeIndex = 0;
+  let activeLayer = 0;
+  let slideshowTimer = null;
+  let stopped = false;
+
+  // Inject CSS automatically.
+  // No need to modify style.css.
+
+  const style = document.createElement("style");
+
+  style.textContent = `
+
+    .hero .hero-photo.hero-slide {
+      position: absolute;
+      inset: 0;
+
+      width: 100%;
+      height: 100%;
+
+      object-fit: cover;
+      object-position: center 45%;
+
+      z-index: -2;
+
+      opacity: 0;
+
+      transform: scale(1.035);
+
+      transition:
+        opacity ${FADE_TIME}ms ease-in-out,
+        transform 8500ms linear;
+
+      will-change: opacity, transform;
+
+      pointer-events: none;
+    }
+
+    .hero .hero-photo.hero-slide.is-active {
+      opacity: 1;
+      transform: scale(1.11);
+    }
+
+    @media (max-width: 600px) {
+
+      .hero .hero-photo.hero-slide {
+        object-position: center 45%;
+      }
+
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      .hero .hero-photo.hero-slide {
+        transition: none;
+        transform: none;
+      }
+
+    }
+
+  `;
+
+  document.head.appendChild(style);
+
+  // Prepare first image
+
+  firstImage.classList.add(
+    "hero-slide",
+    "is-active"
+  );
+
+  firstImage.alt =
+    "A memory from our internship at Naturub";
+
+  // Create second image layer
+
+  const secondImage = firstImage.cloneNode(false);
+
+  secondImage.removeAttribute("fetchpriority");
+  secondImage.removeAttribute("src");
+
+  secondImage.classList.remove("is-active");
+
+  secondImage.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+  secondImage.alt = "";
+
+  firstImage.insertAdjacentElement(
+    "afterend",
+    secondImage
+  );
+
+  const layers = [
+    firstImage,
+    secondImage
+  ];
+
+  // Preload image to avoid flickering
+
+  function preloadImage(src) {
+
+    return new Promise(resolve => {
+
+      const image = new Image();
+
+      image.onload = () => resolve(true);
+
+      image.onerror = () => resolve(false);
+
+      image.src = src;
+
+    });
+
+  }
+
+  // Change hero background
+
+  async function changeSlide() {
+
+    if (stopped) return;
+
+    const nextIndex =
+      (activeIndex + 1) % sources.length;
+
+    const nextLayer = 1 - activeLayer;
+
+    const nextImage = layers[nextLayer];
+
+    const loaded = await preloadImage(
+      sources[nextIndex]
+    );
+
+    if (stopped) return;
+
+    // If image unavailable, preserve previous image
+
+    if (!loaded) {
+
+      slideshowTimer = window.setTimeout(
+        changeSlide,
+        DISPLAY_TIME
+      );
+
+      return;
+
+    }
+
+    nextImage.src = sources[nextIndex];
+
+    // Begin smooth transition
+
+    window.requestAnimationFrame(() => {
+
+      if (stopped) return;
+
+      nextImage.classList.add("is-active");
+
+      layers[activeLayer].classList.remove(
+        "is-active"
+      );
+
+      activeIndex = nextIndex;
+
+      activeLayer = nextLayer;
+
+      slideshowTimer = window.setTimeout(
+        changeSlide,
+        DISPLAY_TIME + FADE_TIME
+      );
+
+    });
+
+  }
+
+  // Pause when visitor leaves browser tab
+
+  document.addEventListener(
+    "visibilitychange",
+    () => {
+
+      if (document.hidden) {
+
+        window.clearTimeout(slideshowTimer);
+
+        stopped = true;
+
+      } else {
+
+        stopped = false;
+
+        window.clearTimeout(slideshowTimer);
+
+        slideshowTimer = window.setTimeout(
+          changeSlide,
+          DISPLAY_TIME
+        );
+
+      }
+
+    }
+  );
+
+  // Start slideshow
+
+  slideshowTimer = window.setTimeout(
+    changeSlide,
+    DISPLAY_TIME
+  );
+
 }
 
+initHeroSlideshow();
+
+
+// ========================================================
+// 2. PHOTO GALLERY
+// ========================================================
+
+const gallery = document.getElementById("gallery");
+
+const dialog = document.getElementById("lightbox");
+
+const viewerImage = document.getElementById(
+  "lightbox-image"
+);
+
+const viewerCount = document.getElementById(
+  "lightbox-count"
+);
+
+const viewerCaption = document.getElementById(
+  "lightbox-caption"
+);
+
+const status = document.getElementById(
+  "live-status"
+);
+
+let currentPhoto = 0;
+
+
+// ========================================================
+// 3. HEART ANIMATION
+// ========================================================
+
+function replayHeart(element) {
+
+  element.classList.remove("burst");
+
+  // Restart animation
+
+  void element.offsetWidth;
+
+  element.classList.add("burst");
+
+  status.textContent =
+    "A little love for this memory!";
+
+}
+
+
+// ========================================================
+// 4. IMAGE VIEWER
+// ========================================================
+
 function showPhoto(index) {
-  currentPhoto = (index + photos.length) % photos.length;
+
+  currentPhoto =
+    (index + photos.length) % photos.length;
+
   const photo = photos[currentPhoto];
+
   viewerImage.src = photo.src;
-  viewerImage.alt = `${photo.title}, photo ${currentPhoto + 1} of ${photos.length}`;
-  viewerCount.textContent = `${photo.number} / ${photos.length}`;
+
+  viewerImage.alt =
+    `${photo.title}, photo ${currentPhoto + 1} of ${photos.length}`;
+
+  viewerCount.textContent =
+    `${photo.number} / ${photos.length}`;
+
   viewerCaption.textContent = photo.title;
+
 }
 
 function openViewer(index) {
+
   showPhoto(index);
-  if (!dialog.open) dialog.showModal();
+
+  if (!dialog.open) {
+    dialog.showModal();
+  }
+
   document.body.classList.add("modal-open");
+
 }
 
 function closeViewer() {
-  if (dialog.open) dialog.close();
+
+  if (dialog.open) {
+    dialog.close();
+  }
+
 }
 
+
+// ========================================================
+// 5. GENERATE GALLERY IMAGES
+// ========================================================
+
 photos.forEach((photo, index) => {
+
   const card = document.createElement("figure");
+
   card.className = "photo-card";
+
   card.innerHTML = `
-    <button class="photo-open" type="button" aria-label="Open photo ${index + 1} of ${photos.length}; double-tap to send a heart">
-      <img src="${photo.src}" alt="Naturub internship memory ${index + 1}" loading="lazy" decoding="async" />
-      <span class="photo-error" aria-hidden="true">Photo unavailable</span>
-      <span class="photo-caption"><span><small>MEMORY ${photo.number}</small><b>${photo.title}</b></span><span class="expand" aria-hidden="true">↗</span></span>
-      <span class="heart-burst" aria-hidden="true">♥</span>
-    </button>`;
+
+    <button
+      class="photo-open"
+      type="button"
+      aria-label="Open photo ${index + 1} of ${photos.length}; double-tap to send a heart"
+    >
+
+      <img
+        src="${photo.src}"
+        alt="Naturub internship memory ${index + 1}"
+        loading="lazy"
+        decoding="async"
+      />
+
+      <span
+        class="photo-error"
+        aria-hidden="true"
+      >
+        Photo unavailable
+      </span>
+
+      <span class="photo-caption">
+
+        <span>
+
+          <small>
+            MEMORY ${photo.number}
+          </small>
+
+          <b>
+            ${photo.title}
+          </b>
+
+        </span>
+
+        <span
+          class="expand"
+          aria-hidden="true"
+        >
+          ↗
+        </span>
+
+      </span>
+
+      <span
+        class="heart-burst"
+        aria-hidden="true"
+      >
+        ♥
+      </span>
+
+    </button>
+
+  `;
+
   gallery.appendChild(card);
 
   const button = card.querySelector("button");
+
   const img = card.querySelector("img");
-  const heart = card.querySelector(".heart-burst");
-  img.addEventListener("load", () => card.classList.add("loaded"));
-  img.addEventListener("error", () => {
-    card.classList.add("is-error");
-    button.disabled = true;
-    button.setAttribute("aria-label", `Photo ${index + 1} unavailable`);
+
+  const heart = card.querySelector(
+    ".heart-burst"
+  );
+
+  // Image loading skeleton
+
+  img.addEventListener("load", () => {
+
+    card.classList.add("loaded");
+
   });
+
+  img.addEventListener("error", () => {
+
+    card.classList.add("is-error");
+
+    button.disabled = true;
+
+    button.setAttribute(
+      "aria-label",
+      `Photo ${index + 1} unavailable`
+    );
+
+  });
+
   if (img.complete) {
-    if (img.naturalWidth) card.classList.add("loaded");
-    else if (img.src) card.classList.add("is-error");
+
+    if (img.naturalWidth) {
+
+      card.classList.add("loaded");
+
+    } else if (img.src) {
+
+      card.classList.add("is-error");
+
+    }
+
   }
+
+  // Double-tap detection
 
   let lastTap = 0;
+
   let singleTapTimer;
+
   button.addEventListener("click", () => {
+
     const now = Date.now();
+
     if (now - lastTap < 320) {
+
       clearTimeout(singleTapTimer);
+
       lastTap = 0;
+
       replayHeart(heart);
+
     } else {
+
       lastTap = now;
+
       singleTapTimer = setTimeout(() => {
+
         lastTap = 0;
+
         openViewer(index);
+
       }, 320);
+
     }
+
   });
-  button.addEventListener("dblclick", event => event.preventDefault());
-});
 
-// Full-screen viewer: arrows, keyboard, swipe, backdrop and double-tap hearts.
-document.getElementById("close-lightbox").addEventListener("click", closeViewer);
-document.getElementById("prev-photo").addEventListener("click", () => showPhoto(currentPhoto - 1));
-document.getElementById("next-photo").addEventListener("click", () => showPhoto(currentPhoto + 1));
-dialog.addEventListener("close", () => document.body.classList.remove("modal-open"));
-dialog.addEventListener("click", event => {
-  if (event.target === dialog) closeViewer();
-});
-document.addEventListener("keydown", event => {
-  if (!dialog.open) return;
-  if (event.key === "ArrowLeft") showPhoto(currentPhoto - 1);
-  if (event.key === "ArrowRight") showPhoto(currentPhoto + 1);
-});
+  button.addEventListener("dblclick", event => {
 
-const imageWrap = document.getElementById("viewer-image-wrap");
-const viewerHeart = document.getElementById("viewer-heart");
-let touchStartX = null;
-imageWrap.addEventListener("touchstart", event => {
-  touchStartX = event.touches.length === 1 ? event.touches[0].clientX : null;
-}, { passive: true });
-imageWrap.addEventListener("touchend", event => {
-  if (touchStartX === null || !event.changedTouches.length) return;
-  const delta = event.changedTouches[0].clientX - touchStartX;
-  touchStartX = null;
-  if (Math.abs(delta) > 55) showPhoto(currentPhoto + (delta < 0 ? 1 : -1));
-}, { passive: true });
-let lastViewerTap = 0;
-imageWrap.addEventListener("click", () => {
-  const now = Date.now();
-  if (now - lastViewerTap < 330) {
-    replayHeart(viewerHeart);
-    lastViewerTap = 0;
-  } else lastViewerTap = now;
-});
-imageWrap.addEventListener("dblclick", event => event.preventDefault());
-
-// Accessible animated tabs (click and arrow-key navigation).
-const tabs = [...document.querySelectorAll('[role="tab"]')];
-const panels = {
-  gallery: document.getElementById("panel-gallery"),
-  note: document.getElementById("panel-note")
-};
-function activateTab(name, focus = false) {
-  tabs.forEach(tab => {
-    const active = tab.dataset.tab === name;
-    tab.classList.toggle("active", active);
-    tab.setAttribute("aria-selected", String(active));
-    tab.tabIndex = active ? 0 : -1;
-    if (active && focus) tab.focus();
-  });
-  Object.entries(panels).forEach(([key, panel]) => { panel.hidden = key !== name; });
-  if (name === "note") startTyping();
-  if (!reducedMotion && window.gsap) {
-    gsap.fromTo(panels[name], { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: .5, ease: "power2.out", clearProps: "opacity,transform" });
-    if (window.ScrollTrigger) ScrollTrigger.refresh();
-  }
-}
-tabs.forEach((tab, index) => {
-  tab.addEventListener("click", () => activateTab(tab.dataset.tab));
-  tab.addEventListener("keydown", event => {
-    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
     event.preventDefault();
-    const next = event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1 : (index + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
-    activateTab(tabs[next].dataset.tab, true);
+
   });
+
 });
 
-// The entire second-tab terminal message types from top to bottom.
-// This is playful pseudocode, not code that is executed by the browser.
-const gratitudeMessage = [
-  "// A little message from all of us",
-  "",
-  "people.who_teach_us = truly_grateful;",
-  "",
-  "while (we.learn) {",
-  "  you.shareKnowledge();",
-  "  you.guideWithPatience();",
-  "  we.ask();",
-  "  we.grow();",
-  "}",
-  "",
-  "// Knowledge stays in our minds.",
-  "// Kindness stays in our hearts.",
-  "",
-  'return "Thank you for everything.";',
-  "",
-  "'From all of us, with heartfelt gratitude.'"
-].join("\n");
 
-const typedElement = document.getElementById("typed-message");
-const replayButton = document.getElementById("replay-typing");
-let typingStarted = false;
-let typingTimer = null;
-let typingPosition = 0;
+// ========================================================
+// 6. FULL-SCREEN VIEWER CONTROLS
+// ========================================================
 
-function typeNextCharacter() {
-  if (typingPosition >= gratitudeMessage.length) {
-    typingTimer = null;
-    replayButton.disabled = false;
-    return;
+document.getElementById(
+  "close-lightbox"
+).addEventListener(
+  "click",
+  closeViewer
+);
+
+document.getElementById(
+  "prev-photo"
+).addEventListener("click", () => {
+
+  showPhoto(currentPhoto - 1);
+
+});
+
+document.getElementById(
+  "next-photo"
+).addEventListener("click", () => {
+
+  showPhoto(currentPhoto + 1);
+
+});
+
+dialog.addEventListener("close", () => {
+
+  document.body.classList.remove(
+    "modal-open"
+  );
+
+});
+
+dialog.addEventListener("click", event => {
+
+  if (event.target === dialog) {
+
+    closeViewer();
+
   }
 
-  const char = gratitudeMessage[typingPosition++];
-  typedElement.textContent += char;
-  // Pause at line endings so the message reads naturally on phones.
-  const delay = char === "\n" ? 150 : char === " " ? 15 : 29;
-  typingTimer = window.setTimeout(typeNextCharacter, delay);
+});
+
+// Keyboard navigation
+
+document.addEventListener("keydown", event => {
+
+  if (!dialog.open) return;
+
+  if (event.key === "ArrowLeft") {
+
+    showPhoto(currentPhoto - 1);
+
+  }
+
+  if (event.key === "ArrowRight") {
+
+    showPhoto(currentPhoto + 1);
+
+  }
+
+});
+
+
+// ========================================================
+// 7. MOBILE SWIPE SUPPORT
+// ========================================================
+
+const imageWrap = document.getElementById(
+  "viewer-image-wrap"
+);
+
+const viewerHeart = document.getElementById(
+  "viewer-heart"
+);
+
+let touchStartX = null;
+
+imageWrap.addEventListener(
+  "touchstart",
+  event => {
+
+    touchStartX =
+      event.touches.length === 1
+        ? event.touches[0].clientX
+        : null;
+
+  },
+  { passive: true }
+);
+
+imageWrap.addEventListener(
+  "touchend",
+  event => {
+
+    if (
+      touchStartX === null ||
+      !event.changedTouches.length
+    ) {
+      return;
+    }
+
+    const delta =
+      event.changedTouches[0].clientX -
+      touchStartX;
+
+    touchStartX = null;
+
+    if (Math.abs(delta) > 55) {
+
+      showPhoto(
+        currentPhoto + (delta < 0 ? 1 : -1)
+      );
+
+    }
+
+  },
+  { passive: true }
+);
+
+
+// ========================================================
+// 8. DOUBLE-TAP HEART IN VIEWER
+// ========================================================
+
+let lastViewerTap = 0;
+
+imageWrap.addEventListener("click", () => {
+
+  const now = Date.now();
+
+  if (now - lastViewerTap < 330) {
+
+    replayHeart(viewerHeart);
+
+    lastViewerTap = 0;
+
+  } else {
+
+    lastViewerTap = now;
+
+  }
+
+});
+
+imageWrap.addEventListener(
+  "dblclick",
+  event => {
+
+    event.preventDefault();
+
+  }
+);
+
+
+// ========================================================
+// 9. COLORFUL THANK-YOU TERMINAL
+// Types the entire message from top to bottom
+// ========================================================
+
+const terminal = document.getElementById(
+  "typed-message"
+);
+
+const replayButton = document.getElementById(
+  "replay-typing"
+);
+
+const terminalWindow = document.querySelector(
+  ".gratitude-terminal"
+);
+
+
+// Terminal content with syntax highlighting
+
+const terminalLines = [
+
+  [
+    {
+      t: "// TO EVERYONE AT NATURUB",
+      c: "comment"
+    }
+  ],
+
+  [],
+
+  [
+    {
+      t: "const ",
+      c: "keyword"
+    },
+    {
+      t: "ourJourney",
+      c: "variable"
+    },
+    {
+      t: " = {",
+      c: "plain"
+    }
+  ],
+
+  [
+    {
+      t: "  arrived: ",
+      c: "property"
+    },
+    {
+      t: '"ready to learn"',
+      c: "string"
+    },
+    {
+      t: ","
+    }
+  ],
+
+  [
+    {
+      t: "  leavingWith: [",
+      c: "property"
+    }
+  ],
+
+  [
+    {
+      t: '    "new skills",',
+      c: "string"
+    }
+  ],
+
+  [
+    {
+      t: '    "meaningful experiences",',
+      c: "string"
+    }
+  ],
+
+  [
+    {
+      t: '    "memories that will stay long after our final day"',
+      c: "string"
+    }
+  ],
+
+  [
+    {
+      t: "  ]",
+      c: "plain"
+    }
+  ],
+
+  [
+    {
+      t: "};",
+      c: "plain"
+    }
+  ],
+
+  [],
+
+  [
+    {
+      t: "const ",
+      c: "keyword"
+    },
+    {
+      t: "thankYou",
+      c: "variable"
+    },
+    {
+      t: " = ["
+    }
+  ],
+
+  [
+    {
+      t: '  "Every mentor who guided us",',
+      c: "string"
+    }
+  ],
+
+  [
+    {
+      t: '  "Every colleague who answered our questions",',
+      c: "string"
+    }
+  ],
+
+  [
+    {
+      t: '  "Every team who welcomed us and made space to grow"',
+      c: "string"
+    }
+  ],
+
+  [
+    {
+      t: "];"
+    }
+  ],
+
+  [],
+
+  [
+    {
+      t: "thankYou",
+      c: "variable"
+    },
+    {
+      t: ".forEach",
+      c: "function"
+    },
+    {
+      t: "((person) => {"
+    }
+  ],
+
+  [
+    {
+      t: "  console",
+      c: "variable"
+    },
+    {
+      t: ".log",
+      c: "function"
+    },
+    {
+      t: "("
+    },
+    {
+      t: '"We appreciate you ♥"',
+      c: "string"
+    },
+    {
+      t: ");"
+    }
+  ],
+
+  [
+    {
+      t: "});"
+    }
+  ],
+
+  [],
+
+  [
+    {
+      t: "// WITH APPRECIATION, FROM ALL OF US ♥",
+      c: "comment"
+    }
+  ]
+
+];
+
+
+// ========================================================
+// 10. TERMINAL TYPING ENGINE
+// ========================================================
+
+let typingTimer = null;
+
+let hasTyped = false;
+
+let generation = 0;
+
+
+// Build terminal structure
+
+function buildTerminal() {
+
+  terminal.replaceChildren();
+
+  const tasks = [];
+
+  terminalLines.forEach((line, lineIndex) => {
+
+    const row = document.createElement("span");
+
+    row.className = "terminal-line";
+
+    terminal.appendChild(row);
+
+    if (!line.length) {
+
+      tasks.push({
+        type: "pause",
+        duration: 130
+      });
+
+    }
+
+    line.forEach(segment => {
+
+      const piece = document.createElement("span");
+
+      piece.className =
+        `syntax-${segment.c || "plain"}`;
+
+      row.appendChild(piece);
+
+      for (const char of segment.t) {
+
+        tasks.push({
+          type: "char",
+          node: piece,
+          char
+        });
+
+      }
+
+    });
+
+    if (lineIndex < terminalLines.length - 1) {
+
+      tasks.push({
+        type: "pause",
+        duration: 120
+      });
+
+    }
+
+  });
+
+  return tasks;
+
 }
+
+
+// Start typing animation
 
 function startTyping(restart = false) {
-  if (typingStarted && !restart) return;
-  typingStarted = true;
-  window.clearTimeout(typingTimer);
-  typingTimer = null;
-  typingPosition = 0;
-  typedElement.textContent = "";
 
-  if (reducedMotion) {
-    typedElement.textContent = gratitudeMessage;
-    replayButton.disabled = false;
-    return;
-  }
+  if (hasTyped && !restart) return;
+
+  hasTyped = true;
+
+  generation++;
+
+  const run = generation;
+
+  window.clearTimeout(typingTimer);
+
+  const tasks = buildTerminal();
 
   replayButton.disabled = true;
-  typeNextCharacter();
-}
 
-replayButton.addEventListener("click", () => startTyping(true));
+  // Reduced motion accessibility
 
-// GSAP is optional: content remains usable if the CDN cannot load.
-if (!reducedMotion && window.gsap) {
-  if (window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
-  gsap.from(".hero-intro", { y: 22, opacity: 0, duration: .8, delay: .2 });
-  gsap.from(".hero h1", { y: 55, opacity: 0, duration: 1.15, delay: .35, ease: "power3.out" });
-  gsap.from(".hero-copy, .primary-link", { y: 28, opacity: 0, duration: .85, delay: .7, stagger: .13 });
-  if (window.ScrollTrigger) {
-    gsap.utils.toArray(".reveal").forEach(element => {
-      gsap.from(element, { scrollTrigger: { trigger: element, start: "top 92%", once: true }, y: 35, opacity: 0, duration: .85, ease: "power2.out" });
+  if (reducedMotion) {
+
+    tasks.forEach(task => {
+
+      if (task.type === "char") {
+
+        task.node.textContent += task.char;
+
+      }
+
     });
-    gsap.utils.toArray(".photo-card").forEach((element, index) => {
-      gsap.from(element, { scrollTrigger: { trigger: element, start: "top 98%", once: true }, y: 24, opacity: 0, duration: .65, delay: (index % 3) * .07, ease: "power2.out" });
-    });
+
+    replayButton.disabled = false;
+
+    return;
+
   }
+
+  let cursor = 0;
+
+  function tick() {
+
+    if (run !== generation) return;
+
+    if (cursor === tasks.length) {
+
+      replayButton.disabled = false;
+
+      terminalWindow.classList.add(
+        "typing-complete"
+      );
+
+      return;
+
+    }
+
+    const task = tasks[cursor++];
+
+    if (task.type === "char") {
+
+      task.node.textContent += task.char;
+
+    }
+
+    const delay =
+      task.type === "pause"
+        ? task.duration
+        : task.char === " "
+          ? 8
+          : 17;
+
+    typingTimer = window.setTimeout(
+      tick,
+      delay
+    );
+
+  }
+
+  terminalWindow.classList.remove(
+    "typing-complete"
+  );
+
+  tick();
+
 }
+
+
+// Replay animation
+
+replayButton.addEventListener(
+  "click",
+  () => {
+
+    startTyping(true);
+
+  }
+);
+
+
+// ========================================================
+// 11. START TERMINAL WHEN VISIBLE
+// ========================================================
+
+if ("IntersectionObserver" in window) {
+
+  const terminalObserver =
+    new IntersectionObserver(entries => {
+
+      if (
+        entries.some(
+          entry => entry.isIntersecting
+        )
+      ) {
+
+        startTyping();
+
+        terminalObserver.disconnect();
+
+      }
+
+    }, {
+      threshold: 0.16
+    });
+
+  terminalObserver.observe(
+    terminalWindow
+  );
+
+} else {
+
+  startTyping();
+
+}
+
+
+// ========================================================
+// 12. GSAP ANIMATIONS
+// ========================================================
+
+// Optional: website remains functional if GSAP fails.
+
+if (!reducedMotion && window.gsap) {
+
+  if (window.ScrollTrigger) {
+
+    gsap.registerPlugin(ScrollTrigger);
+
+  }
+
+  // Hero intro
+
+  gsap.from(".hero-intro", {
+
+    y: 22,
+    opacity: 0,
+    duration: 0.8,
+    delay: 0.2
+
+  });
+
+  // Hero heading
+
+  gsap.from(".hero h1", {
+
+    y: 55,
+    opacity: 0,
+    duration: 1.15,
+    delay: 0.35,
+    ease: "power3.out"
+
+  });
+
+  // Hero text and button
+
+  gsap.from(".hero-copy, .primary-link", {
+
+    y: 28,
+    opacity: 0,
+    duration: 0.85,
+    delay: 0.7,
+    stagger: 0.13
+
+  });
+
+  // Scroll animations
+
+  if (window.ScrollTrigger) {
+
+    gsap.utils.toArray(".reveal").forEach(
+      element => {
+
+        gsap.from(element, {
+
+          scrollTrigger: {
+
+            trigger: element,
+            start: "top 92%",
+            once: true
+
+          },
+
+          y: 35,
+          opacity: 0,
+          duration: 0.85,
+          ease: "power2.out"
+
+        });
+
+      }
+    );
+
+    // Gallery entrance animations
+
+    gsap.utils.toArray(".photo-card").forEach(
+      (element, index) => {
+
+        gsap.from(element, {
+
+          scrollTrigger: {
+
+            trigger: element,
+            start: "top 98%",
+            once: true
+
+          },
+
+          y: 24,
+          opacity: 0,
+          duration: 0.65,
+
+          delay: (index % 3) * 0.07,
+
+          ease: "power2.out"
+
+        });
+
+      }
+    );
+
+  }
+
+}
+
+// ========================================================
+// END — NATURUB THANK-YOU WEBSITE V4
+// ========================================================
