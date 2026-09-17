@@ -18,7 +18,7 @@ const reducedMotion = window.matchMedia(
 
 // ========================================================
 // 1. CINEMATIC HERO BACKGROUND SLIDESHOW
-// First five images: img-20 to img-24
+// First ten images: img-20 to img-29
 // Crossfade + gentle zoom + infinite loop
 // ========================================================
 
@@ -33,7 +33,7 @@ function initHeroSlideshow() {
   if (reducedMotion) return;
 
   const sources = Array.from(
-    { length: 5 },
+    { length: 10 },
     (_, i) => `/img-${i + 20}.jpeg`
   );
 
@@ -283,23 +283,79 @@ const status = document.getElementById(
 let currentPhoto = 0;
 
 
-// ========================================================
-// 3. HEART ANIMATION
-// ========================================================
+// ==========================================
+// INSTAGRAM-STYLE DOUBLE TAP HEART
+// ==========================================
 
 function replayHeart(element) {
+  if (!element) return;
 
+  // Create a perfectly shaped SVG heart.
+  if (!element.querySelector("svg")) {
+    element.innerHTML = `
+      <svg
+        viewBox="0 0 24 24"
+        width="100%"
+        height="100%"
+        fill="#ff3040"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5
+        2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09
+        C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42
+        22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+      </svg>
+    `;
+  }
+
+  // Restart animation on repeated double taps.
   element.classList.remove("burst");
-
-  // Restart animation
-
   void element.offsetWidth;
-
   element.classList.add("burst");
 
-  status.textContent =
-    "A little love for this memory!";
+  // Small hearts spreading outward.
+  const container = element.parentElement;
 
+  if (container && !reducedMotion) {
+    for (let i = 0; i < 8; i++) {
+      const particle = document.createElement("span");
+
+      particle.className = "ig-heart-particle";
+      particle.textContent = "♥";
+      particle.setAttribute("aria-hidden", "true");
+
+      const angle = (Math.PI * 2 * i) / 8;
+      const distance = 65 + Math.random() * 65;
+
+      particle.style.setProperty(
+        "--x",
+        `${Math.cos(angle) * distance}px`
+      );
+
+      particle.style.setProperty(
+        "--y",
+        `${Math.sin(angle) * distance}px`
+      );
+
+      particle.style.setProperty(
+        "--rotation",
+        `${Math.random() * 90 - 45}deg`
+      );
+
+      container.appendChild(particle);
+
+      particle.addEventListener(
+        "animationend",
+        () => particle.remove(),
+        { once: true }
+      );
+    }
+  }
+
+  if (status) {
+    status.textContent = "A little love for this memory!";
+  }
 }
 
 
