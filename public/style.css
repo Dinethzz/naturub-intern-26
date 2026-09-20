@@ -1232,9 +1232,8 @@ button:focus-visible,a:focus-visible,.tab-panel:focus-visible {
 .gratitude-heading h2 em { color: var(--gold); }
 .gratitude-terminal { max-width: 950px; }
 .gratitude-terminal .terminal-content {
-  height: clamp(320px, 38vw, 430px);
+  height: clamp(320px, 38vw, 470px);
   min-height: 0;
-  overflow-y: auto;
   box-sizing: border-box;
   padding: clamp(18px,4vw,38px);
 }

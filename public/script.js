@@ -798,7 +798,7 @@ const terminalLines = [
 
   [
     {
-      t: '    "memories that will stay long after our final day"',
+      t: '    "cherished memories"',
       c: "string"
     }
   ],
