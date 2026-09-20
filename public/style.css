@@ -1231,7 +1231,13 @@ button:focus-visible,a:focus-visible,.tab-panel:focus-visible {
 .gratitude-heading h2 { margin-top: 10px; }
 .gratitude-heading h2 em { color: var(--gold); }
 .gratitude-terminal { max-width: 950px; }
-.gratitude-terminal .terminal-content { min-height: 0; padding: clamp(18px,4vw,38px); }
+.gratitude-terminal .terminal-content {
+  height: clamp(320px, 38vw, 430px);
+  min-height: 0;
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: clamp(18px,4vw,38px);
+}
 .gratitude-terminal .terminal-text { white-space: pre-wrap; overflow-wrap: anywhere; }
 .terminal-line { display: block; min-height: 1.8em; }
 .syntax-comment { color: #8fa6ae; }

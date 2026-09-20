@@ -737,12 +737,12 @@ const terminalWindow = document.querySelector(
 
 const terminalLines = [
 
-  [
-    {
-      t: "// TO EVERYONE AT NATURUB",
-      c: "comment"
-    }
-  ],
+  // [
+  //   {
+  //     t: "// TO EVERYONE AT NATURUB",
+  //     c: "comment"
+  //   }
+  // ],
 
   [],
 
@@ -905,12 +905,12 @@ const terminalLines = [
 
   [],
 
-  [
-    {
-      t: "// WITH APPRECIATION, FROM ALL OF US ♥",
-      c: "comment"
-    }
-  ]
+  // [
+  //   {
+  //     t: "// WITH APPRECIATION, FROM ALL OF US ♥",
+  //     c: "comment"
+  //   }
+  // ]
 
 ];
 
