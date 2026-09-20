@@ -4,8 +4,9 @@
 // Complete JavaScript
 // ========================================================
 
-// Photos: img-20.jpeg through img-30.jpeg
-const photos = Array.from({ length: 11 }, (_, i) => ({
+
+// Photos: img-20.jpeg through img-33.jpeg
+const photos = Array.from({ length: 14 }, (_, i) => ({
   src: `img-${i + 20}.jpeg`,
   title: "A moment to remember",
   number: String(i + 1).padStart(2, "0")
@@ -18,7 +19,7 @@ const reducedMotion = window.matchMedia(
 
 // ========================================================
 // 1. CINEMATIC HERO BACKGROUND SLIDESHOW
-// First ten images: img-20 to img-29
+// First fourteen images: img-20 to img-33
 // Crossfade + gentle zoom + infinite loop
 // ========================================================
 
@@ -33,7 +34,7 @@ function initHeroSlideshow() {
   if (reducedMotion) return;
 
   const sources = Array.from(
-    { length: 10 },
+    { length: 14 },
     (_, i) => `/img-${i + 20}.jpeg`
   );
 
