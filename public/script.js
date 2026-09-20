@@ -6,7 +6,7 @@
 
 
 // Photos: img-20.jpeg through img-33.jpeg
-const photos = Array.from({ length: 14 }, (_, i) => ({
+const photos = Array.from({ length: 13 }, (_, i) => ({
   src: `img-${i + 20}.jpeg`,
   title: "A moment to remember",
   number: String(i + 1).padStart(2, "0")
@@ -34,7 +34,7 @@ function initHeroSlideshow() {
   if (reducedMotion) return;
 
   const sources = Array.from(
-    { length: 14 },
+    { length: 13 },
     (_, i) => `/img-${i + 20}.jpeg`
   );
 
