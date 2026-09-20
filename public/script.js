@@ -33,9 +33,10 @@ function initHeroSlideshow() {
   // Respect accessibility settings
   if (reducedMotion) return;
 
-  const sources = Array.from(
-    { length: 13 },
-    (_, i) => `/img-${i + 20}.jpeg`
+  const imageNumbers = [20, 21, 23, 25,30, 32 ];
+
+  const sources = imageNumbers.map(
+    (num) => `/img-${num}.jpeg`
   );
 
   const DISPLAY_TIME = 5200;
